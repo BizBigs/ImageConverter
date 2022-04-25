@@ -8,11 +8,11 @@
 #include <stdlib.h>
 
 
-struct ImageData {
+typedef struct {
     unsigned char *pixels;
     long  width;
     long height;
-};
+} IMAGEDATA;
 
 
 struct my_error_mgr {
@@ -22,6 +22,6 @@ struct my_error_mgr {
 };
 typedef struct my_error_mgr *my_error_ptr;
 
-struct ImageData read_JPEG_file (char *);
+IMAGEDATA read_JPEG_file (char *);
 
 #endif /* _JPEG_MANAGER_H */
