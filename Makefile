@@ -1,44 +1,48 @@
-NAME	=	img-converter
+.PHONY : clean
 
-SRC		=	src/main.c \
-			src/JpegManager.c
+OUT_FILE_NAME 			= 	libimg-converter.so
 
-OBJ		=	$(SRC:.c=.o)
+SRC						=	src/JpegManager.c \
+							src/PngManager.c
 
-CC		=	gcc
+OBJ						=	$(SRC:.c=.o)
 
-RM		=	rm -f
+IMGCONVERTER_LIBDIR		=	./lib
+TARGET					=	$(IMGCONVERTER_LIBDIR)/$(OUT_FILE_NAME)
 
-INC_DIR =	./includes
+CC						=	gcc
 
-LIBS			+=		-L/usr/lib/x86_64-linux-gnu -ljpeg
+RM						=	rm -f
 
-CFLAGS			+=      -ansi -pedantic -Wextra -Werror -Wall -I$(INC_DIR) 
+INC_DIR 				=	./includes
 
-SUCCESS			=       \033[32;1m[Compilation succeeded]\033[0m
+LDFLAGS 				=	-shared
 
-OBJRM           =       \033[32;1m[Sources Objects Removed]\033[0m
+LIBS					+=	-L/usr/lib/x86_64-linux-gnu -ljpeg -lpng
 
-NAMERM          =       \033[32;1m[Sources Names Removed]\033[0m
+CFLAGS					+=	-ansi -pedantic -Wextra -Werror -Wall -I$(INC_DIR) -fPIC
 
-FAIL            =       \033[31;1m[Compilation failed]\033[0m
+SUCCESS					=	\033[32;1m[Compilation succeeded]\033[0m
 
-all:            $(NAME)
+OBJRM           		=	\033[32;1m[Sources Objects Removed]\033[0m
 
-.c.o:
-	@$(CC) $(CFLAGS) -c $< -o $@
+NAMERM          		=	\033[32;1m[Sources Names Removed]\033[0m
 
-$(NAME):        $(OBJ)
-	@$(CC) $(OBJ) -o $(NAME) $(LIBS) && echo "$(SUCCESS)" || echo "$(FAIL)"
+FAIL            		=	\033[31;1m[Compilation failed]\033[0m
+
+LIBCREATED      		=	\033[32;1m[Library Succesfully Created]\033[0m
+
+all:	$(TARGET)
 
 clean:
 	@$(RM) $(OBJ)
+	@$(RM) $(TARGET)
 	@$(RM) *~
 	@$(RM) \#*\#
 	@echo "$(OBJRM)"
 
-fclean:         clean
-	@$(RM) $(NAME)
-	@echo "$(NAMERM)"
+re:         clean all
 
-re:         fclean all
+$(TARGET) : $(OBJ)
+	@$(CC) $(CFLAGS) $(OBJ) -o $@ $(LDFLAGS) $(LIBS)
+	@echo "$(LIBCREATED)"

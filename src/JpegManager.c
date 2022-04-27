@@ -1,71 +1,56 @@
 #include "JpegManager.h"
 
-
-/*
- * Here's the routine that will replace the standard error_exit method:
- */
-
-void my_error_exit (j_common_ptr cinfo)
+IMAGEDATA *readJpegFile(char *filename)
 {
-  /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
-  my_error_ptr myerr = (my_error_ptr) cinfo->err;
+	struct jpeg_decompress_struct info;
+	struct jpeg_error_mgr err;
 
-  /* Always display the message. */
-  /* We could postpone this until after returning, if we chose. */
-  (*cinfo->err->output_message) (cinfo);
+	IMAGEDATA* lpNewImage;
 
-  /* Return control to the setjmp point */
-  longjmp(myerr->setjmp_buffer, 1);
-}
+	unsigned long int imgWidth, imgHeight;
+	int numComponents;
 
-IMAGEDATA read_JPEG_file(char *filename)
-{
-    struct jpeg_decompress_struct cinfo;
-    struct my_error_mgr jerr;
-    IMAGEDATA imageData= {NULL, 0, 0};
-    FILE * infile; /* Source file */
-    JSAMPROW output_data;
-    unsigned int scanline_len;
-    unsigned int scanline_count = 0;
+	unsigned long int dwBufferBytes;
+	unsigned char* lpData;
 
-    /* Opening image given as argument */
-    if ((infile = fopen(filename, "rb")) == NULL) {
-        fprintf(stderr, "can't open %s\n", filename);
-        return imageData;
-    }
+	unsigned char* lpRowBuffer[1];
 
-    cinfo.err = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
-    if (setjmp(jerr.setjmp_buffer)) {
-        fclose(infile);
-        return imageData;
-    }
+	FILE* fHandle;
 
-    /* Init decompression */
-    jpeg_create_decompress(&cinfo);
+	fHandle = fopen(filename, "rb");
+	if(fHandle == NULL) {
+		fprintf(stderr, "%s:%u: Failed to read file %s\n", __FILE__, __LINE__, filename);
+		return NULL;
+	}
 
-    /* Starting decompression - Reading Header and Decompressing */
-    jpeg_stdio_src(&cinfo, infile);
-    (void) jpeg_read_header(&cinfo, TRUE);
-    (void) jpeg_start_decompress(&cinfo);
+	info.err = jpeg_std_error(&err);
+	jpeg_create_decompress(&info);
 
-    /* Store data into ImageData Structure */
-    imageData.width = cinfo.output_width;
-    imageData.height = cinfo.output_height;
-    imageData.pixels = (unsigned char *)malloc(cinfo.output_width * cinfo.output_height * cinfo.output_components); /* Alloc memory for pixels raw */
+	jpeg_stdio_src(&info, fHandle);
+	jpeg_read_header(&info, TRUE);
 
-    scanline_len = cinfo.output_width * cinfo.output_components;
+	jpeg_start_decompress(&info);
+	imgWidth = info.output_width;
+	imgHeight = info.output_height;
+	numComponents = info.num_components;
 
-    /* Reading image data line by line, and store into ImageData's pixels field */
-    while (cinfo.output_scanline < cinfo.output_height) {
-        output_data = (imageData.pixels + (scanline_count * scanline_len));
-        jpeg_read_scanlines(&cinfo, &output_data, 1);
-        scanline_count++;
-    }
+	dwBufferBytes = imgWidth * imgHeight * 3; /* We only read RGB, not A */
+	lpData = (unsigned char*)malloc(sizeof(unsigned char)*dwBufferBytes);
 
-    /* Free cinfo and Closing file */
-    (void) jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(infile);
-    return imageData;
+	lpNewImage = (IMAGEDATA*)malloc(sizeof(IMAGEDATA));
+	lpNewImage->numComponents = numComponents;
+	lpNewImage->width = imgWidth;
+	lpNewImage->height = imgHeight;
+	lpNewImage->lpData = lpData;
+
+	/* Read scanline by scanline */
+	while(info.output_scanline < info.output_height) {
+		lpRowBuffer[0] = (unsigned char *)(&lpData[3*info.output_width*info.output_scanline]);
+		jpeg_read_scanlines(&info, lpRowBuffer, 1);
+	}
+
+	jpeg_finish_decompress(&info);
+	jpeg_destroy_decompress(&info);
+	fclose(fHandle);
+    return lpNewImage;
 }
