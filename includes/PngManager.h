@@ -13,6 +13,6 @@ typedef struct {
 
 void            writePngFile(IMAGEDATA *, char*);
 int             initPngLib(PNGSTRUCT *);
-unsigned char   **buildPngImage(PNGSTRUCT *, IMAGEDATA *);
+void            buildPngImage(PNGSTRUCT *, IMAGEDATA *, unsigned char  ***);
 
 #endif /* __PNG_MANAGER_H__*/

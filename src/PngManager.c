@@ -24,9 +24,10 @@ int     initPngLib(PNGSTRUCT *pngStruct) {
     return 1;
 }
 
-unsigned char     **buildPngImage(PNGSTRUCT *pngStruct, IMAGEDATA *imageData) {
+void    buildPngImage(PNGSTRUCT *pngStruct, IMAGEDATA *imageData, unsigned char  ***rowPointers) {
     unsigned int i = 0;
-    unsigned char   **rowPointers = (unsigned char **)malloc(imageData->height * sizeof(unsigned char*));
+    
+    *rowPointers = (unsigned char **)malloc(imageData->height * sizeof(unsigned char*));
 
     png_set_IHDR((*pngStruct).png_ptr, (*pngStruct).info_ptr, imageData->width, imageData->height, 8,
         PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
@@ -34,10 +35,9 @@ unsigned char     **buildPngImage(PNGSTRUCT *pngStruct, IMAGEDATA *imageData) {
         PNG_FILTER_TYPE_DEFAULT);
     
     while (i < imageData->height) {
-        rowPointers[i] = imageData->lpData + (i * imageData->width * 3);
+        (*rowPointers)[i] = imageData->lpData + (i * imageData->width * 3);
         i++;
     }
-    return rowPointers;
 }
 
 void    writePngFile(IMAGEDATA *imageData, char* file_name) {
@@ -46,9 +46,11 @@ void    writePngFile(IMAGEDATA *imageData, char* file_name) {
 
     /* create file */
     FILE *fp = fopen(file_name, "wb");
-    if (!fp)
+    if (!fp) {
         printf("[write_png_file] File %s could not be opened for writing", file_name);
-
+        exit(EXIT_FAILURE);
+    }
+        
     /* Init PNG Library */
     if (!initPngLib(&pngStruct)) {
         fclose(fp);
@@ -56,7 +58,7 @@ void    writePngFile(IMAGEDATA *imageData, char* file_name) {
     }
 
     /* Build PNG Image from raw data */
-    rowPointers = buildPngImage(&pngStruct, imageData);
+    buildPngImage(&pngStruct, imageData, &rowPointers);
 
     png_init_io(pngStruct.png_ptr, fp);
     png_set_rows(pngStruct.png_ptr, pngStruct.info_ptr, rowPointers);
