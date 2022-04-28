@@ -3,7 +3,8 @@
 OUT_FILE_NAME 			= 	libimg-converter.so
 
 SRC						=	src/JpegManager.c \
-							src/PngManager.c
+							src/PngManager.c \
+							src/ImageManager.c
 
 OBJ						=	$(SRC:.c=.o)
 

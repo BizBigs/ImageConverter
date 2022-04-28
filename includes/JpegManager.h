@@ -6,7 +6,6 @@
 #include <setjmp.h>
 #include <jpeglib.h>
 #include "ImageManager.h"
-#include <stdlib.h>
 
 IMAGEDATA *readJpegFile(char *);
 

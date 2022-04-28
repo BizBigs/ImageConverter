@@ -1,11 +1,19 @@
 #include "PngManager.h"
 #include "JpegManager.h"
 
-int main() {
-    IMAGEDATA *imageData;
+void    usage() {
+    printf("Usage :\n");
+    /*printf("-ConversionType [-j, -p] [MANDATORY]\n"); TODO*/
+    printf("-SourcePathFile ['<your-path-to-source>.jpg'] [MANDATORY]\n");
+    printf("-DestPathFile ['<your-path-to-dest>.png'] [MANDATORY]\n");
+}
 
-    imageData = readJpegFile("../Images/test2.jpg");
-    /*printf("Data:%s", imageData->lpData);*/
-    writePngFile(imageData, "../Images/test2.png");
+int main(int ac, char **argv) {
+    if (ac != 3) {
+        usage();
+        exit(EXIT_FAILURE);
+    } else {
+        convertJpegToPng(argv[1], argv[2]);
+    }
     return 0;
 }

@@ -4,7 +4,6 @@
 #include <setjmp.h>
 #include "ImageManager.h"
 #include <png.h>
-#include <stdlib.h>
 
 typedef struct {
     png_structp     png_ptr;

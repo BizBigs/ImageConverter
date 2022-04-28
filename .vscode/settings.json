@@ -3,6 +3,8 @@
         "stdio.h": "c",
         "types.h": "c",
         "jpeglib.h": "c",
-        "jpegmanager.h": "c"
+        "jpegmanager.h": "c",
+        "png.h": "c",
+        "pngmanager.h": "c"
     }
 }
