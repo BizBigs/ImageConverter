@@ -4,9 +4,11 @@ Library to convert jpeg format images onto png.
 
 # Dependencies
 
+```
 sudo apt install \
     libjpeg-dev \
     libpng-dev
+```
 
 # Build
 
